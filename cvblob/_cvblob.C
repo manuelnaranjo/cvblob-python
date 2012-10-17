@@ -155,7 +155,7 @@ cvb::CvContourChainCode* ContourChainCode::toCvContourChainCode(){
 cvb::CvContoursChainCode* list2CvContoursChainCode(boost::python::list l) {
   cvb::CvContoursChainCode *ccc = new cvb::CvContoursChainCode();
   for (int i = 0; i < len(l); i++) {
-    ContourChainCode c = extract<ContourChainCode>(l[i]);
+      ContourChainCode c = extract<ContourChainCode>(l[i]);
     ccc->push_back(c.toCvContourChainCode());
   }
   
@@ -372,88 +372,101 @@ void UpdateTracks(boost::python::dict b, \
 
 //boost block -- here's where we reveal everything to Python
 BOOST_PYTHON_MODULE(_cvblob) {
-  class_<ContourChainCode> ("ContourChainCode")
-    .def_readwrite("startingPoint", &ContourChainCode::startingPoint) 
-    .def_readwrite("chainCode", &ContourChainCode::chainCode);
+    class_<CvPoint2D64f> ("CvPoint2D64f")
+        .def_readwrite("x", &CvPoint2D64f::x)
+        .def_readwrite("y", &CvPoint2D64f::y);
 
-  class_<Blob> ("Blob")
-    .def_readwrite("label", &Blob::label)
-    .def_readwrite("minx", &Blob::minx)
-    .def_readwrite("maxx", &Blob::maxx)
-    .def_readwrite("miny", &Blob::miny)
-    .def_readwrite("maxy", &Blob::maxy)
-    .def_readwrite("centroid", &Blob::centroid)
-    .def_readwrite("m00", &Blob::m00)
-    .def_readwrite("area", &Blob::area)
-    .def_readwrite("m10", &Blob::m10)
-    .def_readwrite("m01", &Blob::m01)
-    .def_readwrite("m11", &Blob::m11)
-    .def_readwrite("m20", &Blob::m20)
-    .def_readwrite("m02", &Blob::m02)
-    .def_readwrite("u11", &Blob::u11)
-    .def_readwrite("u20", &Blob::u20)
-    .def_readwrite("u02", &Blob::u02)
-    .def_readwrite("n11", &Blob::n11)
-    .def_readwrite("n20", &Blob::n20)
-    .def_readwrite("n02", &Blob::n02)
-    .def_readwrite("p1", &Blob::p1)
-    .def_readwrite("p2", &Blob::p2)
-    .def_readwrite("contour", &Blob::contour)
-    .def_readwrite("internalContours", &Blob::internalContours);
+    class_<CvPoint> ("CvPoint")
+        .def_readwrite("x", &CvPoint::x)
+        .def_readwrite("y", &CvPoint::y);
+    
+    class_<cvb::CvChainCodes>("CvChainCodes")
+        .def("__iter__", iterator<cvb::CvChainCodes>());
+    
+    class_<cvb::CvContourChainCode> ("ContourChainCode")
+        .def_readwrite("startingPoint", 
+                       &cvb::CvContourChainCode::startingPoint) 
+        .def_readwrite("chainCode", 
+                       &cvb::CvContourChainCode::chainCode);
+
+    
+    class_<Blob> ("Blob")
+        .def_readwrite("label", &Blob::label)
+        .def_readwrite("minx", &Blob::minx)
+        .def_readwrite("maxx", &Blob::maxx)
+        .def_readwrite("miny", &Blob::miny)
+        .def_readwrite("maxy", &Blob::maxy)
+        .def_readwrite("centroid", &Blob::centroid)
+        .def_readwrite("m00", &Blob::m00)
+        .def_readwrite("area", &Blob::area)
+        .def_readwrite("m10", &Blob::m10)
+        .def_readwrite("m01", &Blob::m01)
+        .def_readwrite("m11", &Blob::m11)
+        .def_readwrite("m20", &Blob::m20)
+        .def_readwrite("m02", &Blob::m02)
+        .def_readwrite("u11", &Blob::u11)
+        .def_readwrite("u20", &Blob::u20)
+        .def_readwrite("u02", &Blob::u02)
+        .def_readwrite("n11", &Blob::n11)
+        .def_readwrite("n20", &Blob::n20)
+        .def_readwrite("n02", &Blob::n02)
+        .def_readwrite("p1", &Blob::p1)
+        .def_readwrite("p2", &Blob::p2)
+        .def_readwrite("contour", &Blob::contour)
+        .def_readwrite("__internalContours", &Blob::internalContours);
  
-  class_<Track> ("Track")
-    .def_readwrite("id", &Track::id)
-    .def_readwrite("label", &Track::label)
-    .def_readwrite("minx", &Track::minx)
-    .def_readwrite("maxx", &Track::maxx)
-    .def_readwrite("miny", &Track::miny)
-    .def_readwrite("maxy", &Track::maxy)
-    .def_readwrite("centroid", &Track::centroid)
-    .def_readwrite("lifetime", &Track::lifetime)
-    .def_readwrite("active", &Track::active)
-    .def_readwrite("inactive", &Track::inactive);
+    class_<Track> ("Track")
+        .def_readwrite("id", &Track::id)
+        .def_readwrite("label", &Track::label)
+        .def_readwrite("minx", &Track::minx)
+        .def_readwrite("maxx", &Track::maxx)
+        .def_readwrite("miny", &Track::miny)
+        .def_readwrite("maxy", &Track::maxy)
+        .def_readwrite("centroid", &Track::centroid)
+        .def_readwrite("lifetime", &Track::lifetime)
+        .def_readwrite("active", &Track::active)
+        .def_readwrite("inactive", &Track::inactive);
+    
+    //cvaux.cpp
+    def("DistancePointPoint", DistancePointPoint);
+    def("DistanceLinePoint", DistanceLinePoint);
+    def("DistanceLinePoint", DistanceLinePoint1); //without optional param
+    def("DotProductPoints", DotProductPoints);
+    def("CrossProductPoints", CrossProductPoints);
 
-  //cvaux.cpp
-  def("DistancePointPoint", DistancePointPoint);
-  def("DistanceLinePoint", DistanceLinePoint);
-  def("DistanceLinePoint", DistanceLinePoint1); //without optional param
-  def("DotProductPoints", DotProductPoints);
-  def("CrossProductPoints", CrossProductPoints);
+    //cvblob.cpp
+    def("GreaterBlob", &GreaterBlob);
+    //filterByArea and filterByLabel implemented in __init__.py
+    def("Centroid", &Centroid);
+    def("Angle", &Angle);
+    def("SaveImageBlob", &SaveImageBlob);
+    
+    def("RenderBlob", &RenderBlob);  //all params provided
+    def("RenderBlob", &RenderBlob1); //no optional params
+    def("RenderBlob", &RenderBlob2); //only render mode 
+    def("RenderBlob", &RenderBlob3); //only render mode & color (no alpha)
+    
+    def("RenderBlobs", &RenderBlobs); //all params provided
+    def("RenderBlobs", &RenderBlobs1); //only required params 
+                                       //(no mode or alpha)
+    def("RenderBlobs", &RenderBlobs2); //optional mode parameter provided
 
-  //cvblob.cpp
-  def("GreaterBlob", &GreaterBlob);
-  //filterByArea and filterByLabel implemented in __init__.py
-  def("Centroid", &Centroid);
-  def("Angle", &Angle);
-  def("SaveImageBlob", &SaveImageBlob);
+    def("GetLabel", &GetLabel);
+    def("ContourChainCodePerimeter", ContourChainCodePerimeter);
+    def("ContourPolygonPerimeter", ContourPolygonPerimeter);
+    
+    //cvlabel.cpp
+    def("LabelBlobs", &LabelBlobs);
+    def("FilterLabels", &FilterLabels);
+    
+    //cvColor.cpp
+    def("BlobMeanColor", BlobMeanColor);
 
-  def("RenderBlob", &RenderBlob);  //all params provided
-  def("RenderBlob", &RenderBlob1); //no optional params
-  def("RenderBlob", &RenderBlob2); //only render mode 
-  def("RenderBlob", &RenderBlob3); //only render mode & color (no alpha)
+    //cvtrack.cpp
+    def("UpdateTracks", UpdateTracks);
 
-  def("RenderBlobs", &RenderBlobs); //all params provided
-  def("RenderBlobs", &RenderBlobs1); //only required params (no mode or alpha)
-  def("RenderBlobs", &RenderBlobs2); //optional mode parameter provided
-
-  def("GetLabel", &GetLabel);
-  def("ContourChainCodePerimeter", ContourChainCodePerimeter);
-  def("ContourPolygonPerimeter", ContourPolygonPerimeter);
-
-  //cvlabel.cpp
-  def("LabelBlobs", &LabelBlobs);
-  def("FilterLabels", &FilterLabels);
-
-  //cvColor.cpp
-  def("BlobMeanColor", BlobMeanColor);
-
-  //cvtrack.cpp
-  def("UpdateTracks", UpdateTracks);
-
-
-
-  //build-specific constants that we don't want to hardcode in __init__.py 
-  def("getIPL_DEPTH_LABEL", getIPL_DEPTH_LABEL); 
-  def("getCV_BLOB_MAX_LABEL", cvb::getCV_BLOB_MAX_LABEL); 
+    //build-specific constants that we don't want to hardcode in __init__.py 
+    def("getIPL_DEPTH_LABEL", getIPL_DEPTH_LABEL); 
+    def("getCV_BLOB_MAX_LABEL", cvb::getCV_BLOB_MAX_LABEL); 
   
 }
