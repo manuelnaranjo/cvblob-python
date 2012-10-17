@@ -383,7 +383,11 @@ BOOST_PYTHON_MODULE(_cvblob) {
     class_<cvb::CvChainCodes>("CvChainCodes")
         .def("__iter__", iterator<cvb::CvChainCodes>());
     
-    class_<cvb::CvContourChainCode> ("ContourChainCode")
+    class_<cvb::CvContoursChainCode>("CvContoursChaincode")
+        .def("__iter__", iterator<cvb::CvContoursChainCode>());
+
+    class_<cvb::CvContourChainCode, 
+           cvb::CvContourChainCode*> ("ContourChainCode")
         .def_readwrite("startingPoint", 
                        &cvb::CvContourChainCode::startingPoint) 
         .def_readwrite("chainCode", 
@@ -413,7 +417,7 @@ BOOST_PYTHON_MODULE(_cvblob) {
         .def_readwrite("p1", &Blob::p1)
         .def_readwrite("p2", &Blob::p2)
         .def_readwrite("contour", &Blob::contour)
-        .def_readwrite("__internalContours", &Blob::internalContours);
+        .def_readwrite("internalContours", &Blob::internalContours);
  
     class_<Track> ("Track")
         .def_readwrite("id", &Track::id)
