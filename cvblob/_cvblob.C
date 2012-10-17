@@ -23,8 +23,11 @@ direct wrapper calls.
 //in OpenCV2.2 the convention for the cvPoint type is to treat it as a 
 //tuple, we wrapper that here
 #define tuple2CvPoint(a) cvPoint(extract<int>(a[0]), extract<int>(a[1]))
-#define tuple2CvPoint2D64f(a) cvPoint2D64f(extract<double>(a[0]), extract<double>(a[1]))
-#define tuple2CvScalar(a) cvScalar(extract<double>(a[0]), extract<double>(a[1]), extract<double>(a[2]))
+#define tuple2CvPoint2D64f(a) cvPoint2D64f(extract<double>(a[0]), \
+                                           extract<double>(a[1]))
+#define tuple2CvScalar(a) cvScalar(extract<double>(a[0]), \
+                                   extract<double>(a[1]), \
+                                   extract<double>(a[2]))
 
 //simple casting to our wrapped structs
 #define object2CvBlob(a) (cvb::CvBlob*)extract<Blob*>(a)
@@ -56,7 +59,8 @@ cvb::CvBlobs* dict2CvBlobs(boost::python::dict d) {
   boost::python::list keys = d.keys();
   boost::python::list vals = d.values();
   for (int i = 0; i < len(keys); i++) {
-    b->insert(cvb::CvLabelBlob(extract<cvb::CvLabel>(keys[i]), object2CvBlob(vals[i])));
+    b->insert(cvb::CvLabelBlob(extract<cvb::CvLabel>(keys[i]), \
+                               object2CvBlob(vals[i])));
   }
   
   return b;
@@ -72,7 +76,8 @@ cvb::CvTracks* dict2CvTracks (boost::python::dict d) {
   boost::python::list keys = d.keys();
   boost::python::list vals = d.values();
   for (int i = 0; i < len(keys); i++) {
-    b->insert(cvb::CvIDTrack(extract<cvb::CvID>(keys[i]), object2CvTrack(vals[i])));
+    b->insert(cvb::CvIDTrack(extract<cvb::CvID>(keys[i]), \
+                             object2CvTrack(vals[i])));
   }
   
   return b;
@@ -84,22 +89,26 @@ double DistancePointPoint(tuple a, tuple b) {
 } 
 
 double DotProductPoints(tuple a, tuple b, tuple c) {
-  return cvb::cvDotProductPoints(tuple2CvPoint(a), tuple2CvPoint(b), tuple2CvPoint(c)); 
+  return cvb::cvDotProductPoints(tuple2CvPoint(a), tuple2CvPoint(b), \
+                                 tuple2CvPoint(c)); 
 }
 
 double CrossProductPoints(tuple a, tuple b, tuple c) {
-  return cvb::cvCrossProductPoints(tuple2CvPoint(a), tuple2CvPoint(b), tuple2CvPoint(c)); 
+  return cvb::cvCrossProductPoints(tuple2CvPoint(a), tuple2CvPoint(b), \
+                                   tuple2CvPoint(c)); 
 }
 
 //DistanceLinePoint the is isSegment parameter is optional 
 //so we need a wrapper for each case -- parameter provided, or not
 double DistanceLinePoint(tuple a, tuple b, tuple c, bool isSegment){
-  return cvb::cvDistanceLinePoint(tuple2CvPoint(a), tuple2CvPoint(b), tuple2CvPoint(c), isSegment); 
+  return cvb::cvDistanceLinePoint(tuple2CvPoint(a), tuple2CvPoint(b), \
+                                  tuple2CvPoint(c), isSegment); 
 }
 
 //same function, no segment parameter provided
 double DistanceLinePoint1(tuple a, tuple b, tuple c){
-  return cvb::cvDistanceLinePoint(tuple2CvPoint(a), tuple2CvPoint(b), tuple2CvPoint(c)); }
+  return cvb::cvDistanceLinePoint(tuple2CvPoint(a), tuple2CvPoint(b), \
+                                  tuple2CvPoint(c)); }
 
 //I am having a hard time finding how exactly you are supposed to export 
 //computed #define constants, so this works, but ick. 
@@ -178,7 +187,9 @@ double ContourPolygonPerimeter(boost::python::list l){
 //this wrapper for the cvb::cvLabel function should be called label by my
 //conventions, but unfortunately that was causing inexplicable runtime errors
 //so we're calling it LabelBlobs and using __init__.py to wrapper
-unsigned int LabelBlobs(boost::python::object img, boost::python::object imgOut, boost::python::dict &b) {
+unsigned int LabelBlobs(boost::python::object img, \
+                        boost::python::object imgOut, \
+                        boost::python::dict &b) {
   cvb::CvBlobs blobs;
   unsigned int result = 0;
   result = cvb::cvLabel(object2IplImage(img), object2IplImage(imgOut), blobs);
@@ -200,7 +211,8 @@ void FilterLabels(boost::python::object imgIn, boost::python::object imgOut, boo
 
 //do a lookup on the label image -- give the label of a blob at a specific
 // X and Y coordinate
-cvb::CvLabel GetLabel(boost::python::object img, unsigned int x, unsigned int y) {
+cvb::CvLabel GetLabel(boost::python::object img, unsigned int x, \
+                      unsigned int y) {
   return cvb::cvGetLabel(object2IplImage(img), x, y);
 }
 
@@ -229,57 +241,131 @@ void SaveImageBlob(char *filename, boost::python::object img, Blob blob) {
 //render a blob on an image 
 //three optional parameters mean a total of 4 RenderBlob functions.  
 //First: all params provided
-void RenderBlob(boost::python::object imgLabel, Blob blob, boost::python::object imgSource, boost::python::object imgDest, int mode, boost::python::tuple color, double alpha) {
-  cvb::cvRenderBlob(object2IplImage(imgLabel), (cvb::CvBlob*)&blob, object2IplImage(imgSource), object2IplImage(imgDest), (short)mode, tuple2CvScalar(color), alpha);
+void RenderBlob(boost::python::object imgLabel, \
+                Blob blob, \
+                boost::python::object imgSource, \
+                boost::python::object imgDest, \
+                int mode, \
+                boost::python::tuple color, \
+                double alpha) {
+  cvb::cvRenderBlob(object2IplImage(imgLabel), \
+                    (cvb::CvBlob*)&blob, \
+                    object2IplImage(imgSource), \
+                    object2IplImage(imgDest), \
+                    (short)mode, \
+                    tuple2CvScalar(color), \
+                    alpha);
 }
 
 //RenderBlob1 is with only required params
-void RenderBlob1(boost::python::object imgLabel, Blob blob, boost::python::object imgSource, boost::python::object imgDest) {
-  cvb::cvRenderBlob(object2IplImage(imgLabel), (cvb::CvBlob*)&blob, object2IplImage(imgSource), object2IplImage(imgDest));
+void RenderBlob1(boost::python::object imgLabel, \
+                 Blob blob, \
+                 boost::python::object imgSource, \
+                 boost::python::object imgDest) {
+  cvb::cvRenderBlob(object2IplImage(imgLabel), \
+                    (cvb::CvBlob*)&blob, \
+                    object2IplImage(imgSource), \
+                    object2IplImage(imgDest));
 }
 
 //RenderBlob2 with only mode provided
-void RenderBlob2(boost::python::object imgLabel, Blob blob, boost::python::object imgSource, boost::python::object imgDest, int mode) {
-  cvb::cvRenderBlob(object2IplImage(imgLabel), (cvb::CvBlob*)&blob, object2IplImage(imgSource), object2IplImage(imgDest), (short)mode);
+void RenderBlob2(boost::python::object imgLabel, \
+                 Blob blob, \
+                 boost::python::object imgSource, \
+                 boost::python::object imgDest, \
+                 int mode) {
+  cvb::cvRenderBlob(object2IplImage(imgLabel), \
+                    (cvb::CvBlob*)&blob, \
+                    object2IplImage(imgSource), \
+                    object2IplImage(imgDest), \
+                    (short)mode);
 }
 
 //RenderBlob3 with mode and color provided
-void RenderBlob3(boost::python::object imgLabel, Blob blob, boost::python::object imgSource, boost::python::object imgDest, int mode, boost::python::tuple color) {
-  cvb::cvRenderBlob(object2IplImage(imgLabel), (cvb::CvBlob*)&blob, object2IplImage(imgSource), object2IplImage(imgDest), (unsigned short)mode, tuple2CvScalar(color));
+void RenderBlob3(boost::python::object imgLabel, \
+                 Blob blob, \
+                 boost::python::object imgSource, \
+                 boost::python::object imgDest, \
+                 int mode, \
+                 boost::python::tuple color) {
+  cvb::cvRenderBlob(object2IplImage(imgLabel), \
+                    (cvb::CvBlob*)&blob, \
+                    object2IplImage(imgSource), \
+                    object2IplImage(imgDest), \
+                    (unsigned short)mode, \
+                    tuple2CvScalar(color));
 }
 
 //Render a dict of blobs to the imgDest image
 //Like RenderBlob, RenderBlobs has optional parameters which we'll break
 //out in a similar way -- first, all params
-void RenderBlobs(boost::python::object imgLabel, boost::python::dict blobs, boost::python::object imgSource, boost::python::object imgDest, int mode, double alpha){
-  cvRenderBlobs(object2IplImage(imgLabel), *dict2CvBlobs(blobs), object2IplImage(imgSource), object2IplImage(imgDest), (unsigned short)mode, alpha);
+void RenderBlobs(boost::python::object imgLabel, \
+                 boost::python::dict blobs, \
+                 boost::python::object imgSource, \
+                 boost::python::object imgDest, \
+                 int mode, \
+                 double alpha){
+  cvRenderBlobs(object2IplImage(imgLabel), \
+                *dict2CvBlobs(blobs), \
+                object2IplImage(imgSource), \
+                object2IplImage(imgDest), \
+                (unsigned short)mode, 
+                alpha);
 } 
 
 //only required parameters (no mode or alpha)
-void RenderBlobs1(boost::python::object imgLabel, boost::python::dict blobs, boost::python::object imgSource, boost::python::object imgDest){
-  cvRenderBlobs(object2IplImage(imgLabel), *dict2CvBlobs(blobs), object2IplImage(imgSource), object2IplImage(imgDest));
+void RenderBlobs1(boost::python::object imgLabel, \
+                  boost::python::dict blobs, \
+                  boost::python::object imgSource, \
+                  boost::python::object imgDest){
+  cvRenderBlobs(object2IplImage(imgLabel), \
+                *dict2CvBlobs(blobs), \
+                object2IplImage(imgSource), \
+                object2IplImage(imgDest));
 } 
 
 //only mode optional parameter (no alpha)
-void RenderBlobs2(boost::python::object imgLabel, boost::python::dict blobs, boost::python::object imgSource, boost::python::object imgDest, int mode){
-  cvRenderBlobs(object2IplImage(imgLabel), *dict2CvBlobs(blobs), object2IplImage(imgSource), object2IplImage(imgDest), (unsigned short)mode);
+void RenderBlobs2(boost::python::object imgLabel, \
+                  boost::python::dict blobs, \
+                  boost::python::object imgSource, \
+                  boost::python::object imgDest, \
+                  int mode){
+  cvRenderBlobs(object2IplImage(imgLabel), \
+                *dict2CvBlobs(blobs), \
+                object2IplImage(imgSource), \
+                object2IplImage(imgDest), \
+                (unsigned short)mode);
 } 
 
 //find the mean color value of a blob.  return as a color tuple
-boost::python::tuple BlobMeanColor(boost::python::object blob, boost::python::object imgLabel, boost::python::object img){
-  CvScalar clr = cvb::cvBlobMeanColor(object2CvBlob(blob), object2IplImage(imgLabel), object2IplImage(img));
+boost::python::tuple BlobMeanColor(boost::python::object blob, \
+                                   boost::python::object imgLabel, \
+                                   boost::python::object img){
+  CvScalar clr = cvb::cvBlobMeanColor(object2CvBlob(blob), \
+                                      object2IplImage(imgLabel), \
+                                      object2IplImage(img));
   return make_tuple(clr.val[0], clr.val[1], clr.val[2]);
 }
 
 //cvtrack.cpp wrappers
 
 //given a dict of blobs b, update dict t with the tracks for each blob
-void UpdateTracks(boost::python::dict b, boost::python::dict t, double thDistance, unsigned int thInactive, unsigned int thActive) {
+void UpdateTracks(boost::python::dict b, \
+                  boost::python::dict t, \
+                  double thDistance, \
+                  unsigned int thInactive, \
+                  unsigned int thActive) {
   cvb::CvTracks* tracks = dict2CvTracks(t);
-  cvb::cvUpdateTracks(*dict2CvBlobs(b), *tracks, thDistance, thInactive, thActive);
+  cvb::cvUpdateTracks(*dict2CvBlobs(b), \
+                      *tracks, \
+                      thDistance, \
+                      thInactive, \
+                      thActive);
 
   //we need to make sure everything in *tracks is represented in dict
-  for (cvb::CvTracks::const_iterator i = tracks->begin(); i != tracks->end(); i++) {
+  for (cvb::CvTracks::const_iterator i = tracks->begin(); 
+       i != tracks->end(); 
+       i++) {
     t[i->first] = (Track*)i->second; 
   }
 }
@@ -371,6 +457,3 @@ BOOST_PYTHON_MODULE(_cvblob) {
   def("getCV_BLOB_MAX_LABEL", cvb::getCV_BLOB_MAX_LABEL); 
   
 }
-
-
-
